@@ -13,3 +13,7 @@ BankAccount:https://gist.github.com/abachar/d20bdcd07dac589feef8ef21b487648c
 
 Implementation : PlayFramework/Scala
 
+To run the project simply run 
+
+    sbt rub
+

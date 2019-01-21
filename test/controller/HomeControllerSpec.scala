@@ -7,11 +7,13 @@ import org.hamcrest.Matchers._
 import org.junit.Test
 
 class HomeControllerSpec {
-@Test
-  def `trying rest assured in scala`(): Unit = {
+
+   @Test
+   def `trying rest assured in scala`() {
 
      when()
-      .get("/")
+       //@TODO path should be '/' but it's currently not working for me
+      .get("http://localhost:9000")
     .Then()
       .statusCode(200)
   }

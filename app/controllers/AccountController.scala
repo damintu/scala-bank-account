@@ -4,14 +4,15 @@ import javax.inject.Inject
 import play.api.mvc.{AbstractController, ControllerComponents}
 import play.api.data._
 import play.api.data.Forms._
-import play.api.data.validation.Constraints._
-import models.Account
+import models.{Account, AccountRepository}
 import play.api.libs.json._
 
-class AccountController @Inject()(c : ControllerComponents) extends AbstractController(c){
+import scala.concurrent.{ExecutionContext, Future}
 
-  //implicit val accountReads = Json.reads[Account]
-  implicit val accountWrites = Json.writes[Account]
+class AccountController @Inject()(c : ControllerComponents,repository : AccountRepository)(implicit ec: ExecutionContext) extends AbstractController(c){
+
+  case class FormAccount(firstName : String, lastName : String)
+  implicit val formAccountWrites = Json.writes[FormAccount]
 
 
   implicit object FormErrorWrites extends Writes[FormError] {
@@ -25,19 +26,18 @@ class AccountController @Inject()(c : ControllerComponents) extends AbstractCont
     mapping(
       "firstName" -> text,
       "lastName" -> text,
-      "id" -> optional(number)
-    )(Account.apply)(Account.unapply)
+    )(FormAccount.apply)(FormAccount.unapply)
   )
 
   def create = Action.async(parse.json){ implicit request =>
       accountForm.bindFromRequest.fold(
         formWithErrors => {
-          BadRequest(Json.toJson(formWithErrors.errors))
+          Future.successful(BadRequest(Json.toJson(formWithErrors.errors)))
         },
         accountForm => {
-          //@todo save it
-
-          Created(Json.toJson(accountForm))
+          repository.create(accountForm.firstName, accountForm.lastName).map { account =>
+            Created(Json.toJson(account))
+          }
         }
       )
   }

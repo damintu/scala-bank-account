@@ -1,5 +1,9 @@
 package models
 
-case class Account(firstName : String, lastName : String, id : Option[Int])
+import play.api.libs.json._
 
+case class Account(id : Long, firstName : String, lastName : String)
 
+object Account {
+  implicit val accountFormat = Json.format[Account]
+}

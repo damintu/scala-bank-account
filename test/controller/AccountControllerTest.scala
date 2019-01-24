@@ -20,6 +20,7 @@ class AccountControllerTest {
       .post("http://localhost:9000/account")
       .Then()
       .statusCode(201)
+      .body("$",hasKey("id"))
       .body("firstName",equalTo("damien"))
       .body("lastName",equalTo("sarrol"))
   }

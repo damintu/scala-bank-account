@@ -11,8 +11,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AccountController @Inject()(c : ControllerComponents,repository : AccountRepository)(implicit ec: ExecutionContext) extends AbstractController(c){
 
-  case class FormAccount(firstName : String, lastName : String)
-  implicit val formAccountWrites = Json.writes[FormAccount]
+  case class CreateAccountForm(firstName : String, lastName : String)
+  implicit val formAccountWrites = Json.writes[CreateAccountForm]
 
 
   implicit object FormErrorWrites extends Writes[FormError] {
@@ -26,9 +26,12 @@ class AccountController @Inject()(c : ControllerComponents,repository : AccountR
     mapping(
       "firstName" -> text,
       "lastName" -> text,
-    )(FormAccount.apply)(FormAccount.unapply)
+    )(CreateAccountForm.apply)(CreateAccountForm.unapply)
   )
 
+  /**
+    * A REST endpoint that creates an account
+    */
   def create = Action.async(parse.json){ implicit request =>
       accountForm.bindFromRequest.fold(
         formWithErrors => {
@@ -42,5 +45,12 @@ class AccountController @Inject()(c : ControllerComponents,repository : AccountR
       )
   }
 
-  def get = ???
+  /**
+    * A REST endpoint that gets all the accounts as JSON.
+    */
+  def get = Action.async { implicit request =>
+    repository.list().map { account =>
+      Ok(Json.toJson(account))
+    }
+  }
 }

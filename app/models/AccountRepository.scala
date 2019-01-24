@@ -3,7 +3,6 @@ package models
 import javax.inject.{ Inject, Singleton }
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-
 import scala.concurrent.{ Future, ExecutionContext }
 
 @Singleton
@@ -14,11 +13,11 @@ class AccountRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(imp
   import dbConfig._
   import profile.api._
 
-  private class AccountTable(tag: Tag) extends Table[Account](tag, "account") {
+  private class AccountTable(tag: Tag) extends Table[Account](tag, "ACCOUNT") {
 
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def firstName = column[String]("firstName")
-    def lastName = column[String]("lastName")
+    def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
+    def firstName = column[String]("FIRSTNAME")
+    def lastName = column[String]("LASTNAME")
     def * = (id, firstName, lastName) <> ((Account.apply _).tupled, Account.unapply)
   }
 

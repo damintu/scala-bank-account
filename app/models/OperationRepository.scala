@@ -3,7 +3,8 @@ package models
 import javax.inject.{Inject, Singleton}
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-import java.sql.Date
+import java.sql.Timestamp
+import java.time.Instant
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -20,7 +21,7 @@ class OperationRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(i
   private class OperationTable(tag: Tag) extends Table[Operation](tag, "OPERATION") {
 
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
-    def date =column[Date]("DATE")
+    def date =column[Timestamp]("DATE")
     def nature = column[String]("NATURE")
     def amount = column[Double]("AMOUNT")
     def accountId = column[Long]("ACCOUNT_ID")
@@ -37,7 +38,7 @@ class OperationRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(i
       returning operation.map(_.id)
       // And we define a transformation for the returned value, which combines our original parameters with the
       // returned id
-      into ((param, id) => Operation(id,null, param._1, param._2))
+      into ((param, id) => Operation(id,new Timestamp(Instant.now.toEpochMilli), param._1, param._2))
       // And finally, insert the operation into the database
       ) += ( nature, amount)
   }

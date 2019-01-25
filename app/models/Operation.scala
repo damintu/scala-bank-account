@@ -3,8 +3,8 @@ package models
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import play.api.libs.json._
-import java.util.Date
-case class Operation(id : Long, date: Date = new Date, nature : String, amount: Double)
+
+case class Operation(id : Long, date: Timestamp, nature : String, amount: Double)
 
 object Operation {
 

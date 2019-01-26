@@ -20,12 +20,13 @@ class OperationControllerTest {
       //@TODO path should be '/' but it's currently not working for me
       .post("http://localhost:9000/operation")
       .Then()
-      .statusCode(200)
+      .statusCode(201)
       .body("$",hasKey("id"))
       .body("$",hasKey("date"))
+      .body("$",hasKey("total"))
       .body("account",equalTo(1))
       .body("type",equalTo("deposit"))
-      .body("amount",greaterThan(50))
+      .body("amount",equalTo(50))
   }
 
   @Test
@@ -71,12 +72,13 @@ class OperationControllerTest {
       //@TODO path should be '/' but it's currently not working for me
       .post("http://localhost:9000/operation")
       .Then()
-      .statusCode(200)
+      .statusCode(201)
       .body("$",hasKey("id"))
       .body("$",hasKey("date"))
+      .body("$",hasKey("total"))
       .body("account",equalTo(1))
       .body("type",equalTo("withdrawal"))
-      .body("amount",greaterThan(50))
+      .body("amount",equalTo(50))
   }
 
   @Test

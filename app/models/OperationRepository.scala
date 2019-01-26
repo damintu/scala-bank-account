@@ -21,29 +21,41 @@ class OperationRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(i
   private class OperationTable(tag: Tag) extends Table[Operation](tag, "OPERATION") {
 
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
-    def date =column[Timestamp]("DATE")
+
+    def date = column[Timestamp]("DATE")
+
     def nature = column[String]("NATURE")
+
     def amount = column[Double]("AMOUNT")
+
+    def total = column[Double]("TOTAL")
+
     def accountId = column[Long]("ACCOUNT_ID")
-    def account = foreignKey("ACCOUNT",accountId,accountTableQuery)(_.id)
-    def * = (id, date,nature, amount) <> ((Operation.apply _).tupled, Operation.unapply)
+
+    def account = foreignKey("ACCOUNT", accountId, accountTableQuery)(_.id)
+
+    def * = (id, date, nature, amount,total) <> ((Operation.apply _).tupled, Operation.unapply)
   }
 
-  private val operation = TableQuery[OperationTable]
+  private val operationTable = TableQuery[OperationTable]
 
-  def create(accountId: Long, nature: String, amount: Double): Future[Operation] = db.run {
+  def create(accountId: Long, nature: String, amount: Double,total : Double): Future[Operation] = db.run {
     // We create a projection of just the name and age columns, since we're not inserting a value for the id column
-    (operation.map(o => (o.nature, o.amount))
+    (operationTable.map(o => (o.nature, o.amount,o.total))
       // Now define it to return the id, because we want to know what id was generated for the person
-      returning operation.map(_.id)
+      returning operationTable.map(_.id)
       // And we define a transformation for the returned value, which combines our original parameters with the
       // returned id
-      into ((param, id) => Operation(id,new Timestamp(Instant.now.toEpochMilli), param._1, param._2))
+      into ((param, id) => Operation(id, new Timestamp(Instant.now.toEpochMilli), param._1, param._2,param._3))
       // And finally, insert the operation into the database
-      ) += ( nature, amount)
+      ) += (nature, amount, total)
   }
 
   def list(): Future[Seq[Operation]] = db.run {
-    operation.result
+    operationTable.result
+  }
+
+  def findOneByAccount(accountId : Long): Future[Seq[Operation]] = db.run {
+    operationTable.filter(_.accountId === accountId).take(1).result
   }
 }

@@ -4,7 +4,8 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import play.api.libs.json._
 
-case class Operation(id : Long, date: Timestamp, nature : String, amount: Double)
+//to keep it simple the total amount on the account will be stored with the operation
+case class Operation(id : Long, date: Timestamp, nature : String, amount: Double, total : Double)
 
 object Operation {
 

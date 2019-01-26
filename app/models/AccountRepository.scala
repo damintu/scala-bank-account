@@ -21,13 +21,13 @@ class AccountRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(imp
     def * = (id, firstName, lastName) <> ((Account.apply _).tupled, Account.unapply)
   }
 
-  private val account = TableQuery[AccountTable]
+  private val accountTable = TableQuery[AccountTable]
 
   def create(firstName: String, lastName: String): Future[Account] = db.run {
     // We create a projection of just the name and age columns, since we're not inserting a value for the id column
-    (account.map(a => (a.firstName, a.lastName))
+    (accountTable.map(a => (a.firstName, a.lastName))
       // Now define it to return the id, because we want to know what id was generated for the person
-      returning account.map(_.id)
+      returning accountTable.map(_.id)
       // And we define a transformation for the returned value, which combines our original parameters with the
       // returned id
       into ((names, id) => Account(id, names._1, names._2))
@@ -36,6 +36,6 @@ class AccountRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(imp
   }
 
   def list(): Future[Seq[Account]] = db.run {
-    account.result
+    accountTable.result
   }
 }

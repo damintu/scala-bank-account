@@ -9,6 +9,9 @@ case class Operation(id : Long, date: Timestamp, nature : String, amount: Double
 
 object Operation {
 
+  val Deposit = "deposit"
+  val Withdrawal = "withdrawal"
+
   implicit val operationFormat = Json.format[Operation]
 
   implicit object timestampFormat extends Format[Timestamp] {

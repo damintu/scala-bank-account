@@ -7,14 +7,15 @@ import play.api.data.Forms._
 import models.{Operation, OperationRepository}
 import play.api.libs.json._
 import play.api.data.format.Formats._
-import play.api.data.validation.{Constraint, Invalid, Valid,ValidationError}
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import services.OperationValidator
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class OperationController @Inject()(c : ControllerComponents,repository : OperationRepository, op : OperationValidator )(implicit ec: ExecutionContext) extends AbstractController(c){
+class OperationController @Inject()(c: ControllerComponents, repository: OperationRepository, op: OperationValidator)(implicit ec: ExecutionContext) extends AbstractController(c) {
 
-  case class CreateOperationForm(accountId : Long, nature : String, amount : Double)
+  case class CreateOperationForm(accountId: Long, nature: String, amount: Double)
+
   implicit val formOperationWrites = Json.writes[CreateOperationForm]
 
 
@@ -24,7 +25,8 @@ class OperationController @Inject()(c : ControllerComponents,repository : Operat
       "message" -> Json.toJson(o.message)
     )
   }
-//TODO we should move the Constraints elsewhere
+
+  //TODO we should move the Constraints elsewhere
   val TypeFieldConstraint: Constraint[CreateOperationForm] = Constraint("constraints.TypeFieldConstraint")({
     registerForm =>
       // you have access to all the fields in the form here and can
@@ -40,7 +42,7 @@ class OperationController @Inject()(c : ControllerComponents,repository : Operat
     registerForm =>
       // you have access to all the fields in the form here and can
       // write complex logic here
-      if (registerForm.amount > 0 ) {
+      if (registerForm.amount > 0) {
         Valid
       } else {
         Invalid(Seq(ValidationError("\"amount\" field must be positive")))
@@ -60,14 +62,16 @@ class OperationController @Inject()(c : ControllerComponents,repository : Operat
   /**
     * A REST endpoint that creates an operation
     */
-  def create = Action.async(parse.json){ implicit request =>
+  def create = Action.async(parse.json) { implicit request =>
     operationForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(Json.toJson(formWithErrors.errors)))
       },
       operationForm => {
-        val total = op.processAmount(operationForm.accountId,operationForm.nature,operationForm.amount)
-        repository.create(operationForm.accountId,operationForm.nature, operationForm.amount,total).map { operation =>
+        // we also need to check if accountId exists
+        //this is async and total is not the right value. plz help
+        val total = Future.successful(op.processAmount(operationForm.accountId, operationForm.nature, operationForm.amount))
+        repository.create(operationForm.accountId, operationForm.nature, operationForm.amount, 0.00).map { operation =>
           Created(Json.toJson(operation))
         }
       }
@@ -82,8 +86,9 @@ class OperationController @Inject()(c : ControllerComponents,repository : Operat
       Ok(Json.toJson(operation))
     }
   }
-  def get(accountId :Long ) = Action.async { implicit request =>
-    repository.findOneByAccount(accountId).map { operation =>
+
+  def get(operationId: Long) = Action.async { implicit request =>
+    repository.findOneById(operationId).map { operation =>
       Ok(Json.toJson(operation))
     }
   }

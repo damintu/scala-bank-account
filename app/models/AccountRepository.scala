@@ -24,7 +24,7 @@ class AccountRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(imp
   private val accountTable = TableQuery[AccountTable]
 
   def create(firstName: String, lastName: String): Future[Account] = db.run {
-    // We create a projection of just the name and age columns, since we're not inserting a value for the id column
+    // We create a projection of just the firstName and lastName columns, since we're not inserting a value for the id column
     (accountTable.map(a => (a.firstName, a.lastName))
       // Now define it to return the id, because we want to know what id was generated for the person
       returning accountTable.map(_.id)

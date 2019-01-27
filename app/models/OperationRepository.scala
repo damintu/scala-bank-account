@@ -34,21 +34,21 @@ class OperationRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(i
 
     def account = foreignKey("ACCOUNT", accountId, accountTableQuery)(_.id)
 
-    def * = (id, date, nature, amount, total) <> ((Operation.apply _).tupled, Operation.unapply)
+    def * = (id, date, nature, amount, total, accountId) <> ((Operation.apply _).tupled, Operation.unapply)
   }
 
   private val operationTable = TableQuery[OperationTable]
 
   def create(accountId: Long, nature: String, amount: Double, total: Double): Future[Operation] = db.run {
     // We create a projection of just the name and age columns, since we're not inserting a value for the id column
-    (operationTable.map(o => (o.nature, o.amount, o.total))
+    (operationTable.map(o => (o.nature, o.amount, o.total,o.accountId))
       // Now define it to return the id, because we want to know what id was generated for the person
       returning operationTable.map(_.id)
       // And we define a transformation for the returned value, which combines our original parameters with the
       // returned id
-      into ((param, id) => Operation(id, new Timestamp(Instant.now.toEpochMilli), param._1, param._2, param._3))
+      into ((param, id) => Operation(id, new Timestamp(Instant.now.toEpochMilli), param._1, param._2, param._3,param._4))
       // And finally, insert the operation into the database
-      ) += (nature, amount, total)
+      ) += (nature, amount, total,accountId)
   }
 
   def list(): Future[Seq[Operation]] = db.run {

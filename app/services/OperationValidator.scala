@@ -10,32 +10,19 @@ import scala.util.{Failure, Success}
 
 class OperationValidator @Inject()(repository: OperationRepository) (implicit ec: ExecutionContext) {
 
-
-  def processAmount (accountId:Long, nature : String, amount: Double): Double = {
-
-    val operation = repository findLastestByAccountId accountId
-    calculateAmount(operation,nature,amount)
-  }
+  def processAmount(accountId: Long, nature: String, amount: Double): Future[Double] = for {
+    operation <- repository findLastestByAccountId accountId;
+    result <- calculateAmount(operation, nature, amount)
+  } yield result
 
   @throws
-  private def calculateAmount(previousOperation: Future[Option[Operation]],nature : String, amount : Double): Double ={
-
-    var total = 10.00
-    previousOperation onComplete {
-      case Success(o) => {
-        if (o.isEmpty && nature == Operation.Deposit){
-            amount
-        } else if ( o.isDefined){
-            if (nature == Operation.Deposit){
-               o.get.total + amount
-            }else if (nature == Operation.Deposit){
-              o.get.total - amount
-            }
-        }
+  private def calculateAmount(previousOperation: Option[Operation], nature: String, amount: Double): Future[Double] = {
+    Future(previousOperation match {
+      case Some(prevOp) => nature match {
+        case Operation.Deposit => prevOp.total + amount
+        case Operation.Withdrawal => prevOp.total - amount
       }
-      case Failure(e) =>
-        throw new Exception(e)
-    }
-    total
+      case None => amount
+    })
   }
 }

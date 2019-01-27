@@ -68,16 +68,18 @@ class OperationController @Inject()(c: ControllerComponents, repository: Operati
         Future.successful(BadRequest(Json.toJson(formWithErrors.errors)))
       },
       operationForm => {
-        // we also need to check if accountId exists
-        //this is async and total is not the right value. plz help
-        val total = Future.successful(op.processAmount(operationForm.accountId, operationForm.nature, operationForm.amount))
-        repository.create(operationForm.accountId, operationForm.nature, operationForm.amount, 0.00).map { operation =>
-          Created(Json.toJson(operation))
-        }
+        startApiProcessAmountCall(operationForm)
+          .map(returnResultsOperation)
       }
     )
   }
 
+  def startApiProcessAmountCall(form: CreateOperationForm) = for (
+    processAmount <- op.processAmount(form.accountId,form.nature,form.amount);
+    create <- repository.create(form.accountId,form.nature,form.amount,processAmount)
+  ) yield create
+
+  def returnResultsOperation(operation: Operation) = Created(Json.toJson(operation))
   /**
     * A REST endpoint that gets all the operations as JSON.
     */

@@ -1,9 +1,9 @@
 # scala-bank-account [![Build Status](https://travis-ci.org/damintu/scala-bank-account.svg?branch=master)](https://travis-ci.org/damintu/scala-bank-account)
 
-Objectif
+## Objectif
 
 
-Illustrer la maîtrise des frameworks dans une mini application fullstack
+### Illustrer la maîtrise des frameworks dans une mini application fullstack
 
     Software Factory (outil de build + docker)
     Framework front + back
@@ -13,7 +13,7 @@ BankAccount:https://gist.github.com/abachar/d20bdcd07dac589feef8ef21b487648c
 
 Implementation : PlayFramework/Scala
 
-Stories to implement :
+### Stories to implement :
 
     account creation
     deposit with amount >0
@@ -22,11 +22,13 @@ Stories to implement :
     withdrawal with amount <= 0
     list of operations
     
-To run the project simply run 
+## To run the project simply run 
 
     sbt run
     
-To launch the tests 
+## To launch the tests 
 
     sbt test
 
+## API : 
+To browse the exposed API see [https://documenter.getpostman.com/view/4165901/RztiuVo8](https://documenter.getpostman.com/view/4165901/RztiuVo8)

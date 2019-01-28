@@ -1,4 +1,4 @@
-# scala-bank-account
+# scala-bank-account [![Build Status](https://travis-ci.org/damintu/scala-bank-account.svg?branch=master)](https://travis-ci.org/damintu/scala-bank-account)
 
 Objectif
 

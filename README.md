@@ -24,5 +24,9 @@ Stories to implement :
     
 To run the project simply run 
 
-    sbt rub
+    sbt run
+    
+To launch the tests 
+
+    sbt test
 

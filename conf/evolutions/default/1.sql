@@ -6,6 +6,7 @@ create table "ACCOUNT" (
   "LASTNAME" varchar not null
 );
 
+INSERT INTO ACCOUNT (1,"John","Doe")
 # --- !Downs
 
 drop table "ACCOUNT" if exists;

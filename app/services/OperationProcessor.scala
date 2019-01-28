@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
 
-class OperationValidator @Inject()(repository: OperationRepository) (implicit ec: ExecutionContext) {
+class OperationProcessor @Inject()(repository: OperationRepository) (implicit ec: ExecutionContext) {
 
   def processAmount(accountId: Long, nature: String, amount: Double): Future[Double] = for {
     operation <- repository findLastestByAccountId accountId;
@@ -22,7 +22,10 @@ class OperationValidator @Inject()(repository: OperationRepository) (implicit ec
         case Operation.Deposit => prevOp.total + amount
         case Operation.Withdrawal => prevOp.total - amount
       }
-      case None => amount
+      case None => nature match {
+        case Operation.Deposit => amount
+        case Operation.Withdrawal => -amount
+      }
     })
   }
 }

@@ -5,16 +5,19 @@ import io.restassured.matcher.RestAssuredMatchers._
 import io.restassured.module.scala.RestAssuredSupport.AddThenToResponse
 import org.hamcrest.Matchers._
 import org.junit.Test
+import play.api.test.Helpers.running
+import play.api.test.TestServer
 
 class HomeControllerSpec {
 
-   @Test
+  @Test
    def `trying rest assured in scala`() {
-
-     when()
-       //@TODO path should be '/' but it's currently not working for me
-      .get("http://localhost:9000")
-    .Then()
-      .statusCode(200)
-  }
+     running(TestServer(9000)) {
+       given()
+       when()
+         .get("http://localhost:9000")
+         .Then()
+         .statusCode(200)
+     }
+   }
 }

@@ -8,16 +8,58 @@ import models.{Operation, OperationRepository}
 import play.api.libs.json._
 import play.api.data.format.Formats._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import services.OperationValidator
-
+import services.OperationProcessor
 import scala.concurrent.{ExecutionContext, Future}
 
-class OperationController @Inject()(c: ControllerComponents, repository: OperationRepository, op: OperationValidator)(implicit ec: ExecutionContext) extends AbstractController(c) {
+class OperationController @Inject()(
+                                     c: ControllerComponents,
+                                     repository: OperationRepository,
+                                     op: OperationProcessor,
+                                     ac : AccountController
+                                   )(implicit ec: ExecutionContext) extends AbstractController(c) {
 
-  case class CreateOperationForm(accountId: Long, nature: String, amount: Double)
+  /**
+    * A REST endpoint that creates an operation
+    */
+  def create = Action.async(parse.json) { implicit request =>
+    operationForm.bindFromRequest.fold(
+      formWithErrors => {
+        Future.successful(BadRequest(Json.toJson(formWithErrors.errors)))
+      },
+      operationForm => {
+        startApiProcessAmountCall(operationForm)
+          .map{operation =>
+            Created(Json.toJson(operation))
+          }
+      }
+    )
+  }
+
+  private def startApiProcessAmountCall(form: CreateOperationForm) = for (
+    processAmount <- op.processAmount(form.accountId,form.nature,form.amount);
+    create <- repository.create(form.accountId,form.nature,form.amount,processAmount)
+  ) yield create
+
+  /**
+    * A REST endpoint that gets all the operations as JSON.
+    */
+  def list = Action.async { implicit request =>
+    repository.list().map { operation =>
+      Ok(Json.toJson(operation))
+    }
+  }
+
+  def get(operationId: Long) = Action.async { implicit request =>
+    repository.findOneById(operationId).map { operation =>
+      Ok(Json.toJson(operation))
+    }
+  }
+
+  //@todo All of this has nothing to do in the controller.
 
   implicit val formOperationWrites = Json.writes[CreateOperationForm]
 
+  case class CreateOperationForm(accountId: Long, nature: String, amount: Double)
 
   implicit object FormErrorWrites extends Writes[FormError] {
     override def writes(o: FormError): JsValue = Json.obj(
@@ -26,8 +68,7 @@ class OperationController @Inject()(c: ControllerComponents, repository: Operati
     )
   }
 
-  //TODO we should move the Constraints elsewhere
-  val TypeFieldConstraint: Constraint[CreateOperationForm] = Constraint("constraints.TypeFieldConstraint")({
+  implicit val TypeFieldConstraint: Constraint[CreateOperationForm] = Constraint("constraints.TypeFieldConstraint")({
     registerForm =>
       // you have access to all the fields in the form here and can
       // write complex logic here
@@ -37,8 +78,7 @@ class OperationController @Inject()(c: ControllerComponents, repository: Operati
         Invalid(Seq(ValidationError("\"type\" field must be \"deposit\" or \"withdrawal\"")))
       }
   })
-  //@TODO we should move the Constraints elsewhere
-  val PositiveAmountConstraint: Constraint[CreateOperationForm] = Constraint("constraints.PositiveAmountConstraint")({
+  implicit val PositiveAmountConstraint: Constraint[CreateOperationForm] = Constraint("constraints.PositiveAmountConstraint")({
     registerForm =>
       // you have access to all the fields in the form here and can
       // write complex logic here
@@ -59,40 +99,5 @@ class OperationController @Inject()(c: ControllerComponents, repository: Operati
       .verifying(PositiveAmountConstraint)
   )
 
-  /**
-    * A REST endpoint that creates an operation
-    */
-  def create = Action.async(parse.json) { implicit request =>
-    operationForm.bindFromRequest.fold(
-      formWithErrors => {
-        Future.successful(BadRequest(Json.toJson(formWithErrors.errors)))
-      },
-      operationForm => {
-        startApiProcessAmountCall(operationForm)
-          .map(returnResultsOperation)
-      }
-    )
-  }
-
-  def startApiProcessAmountCall(form: CreateOperationForm) = for (
-    processAmount <- op.processAmount(form.accountId,form.nature,form.amount);
-    create <- repository.create(form.accountId,form.nature,form.amount,processAmount)
-  ) yield create
-
-  def returnResultsOperation(operation: Operation) = Created(Json.toJson(operation))
-  /**
-    * A REST endpoint that gets all the operations as JSON.
-    */
-  def list = Action.async { implicit request =>
-    repository.list().map { operation =>
-      Ok(Json.toJson(operation))
-    }
-  }
-
-  def get(operationId: Long) = Action.async { implicit request =>
-    repository.findOneById(operationId).map { operation =>
-      Ok(Json.toJson(operation))
-    }
-  }
 
 }

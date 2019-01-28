@@ -24,8 +24,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick" % "3.0.3",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.3",
   "org.scalactic" %% "scalactic" % "3.0.5",
-  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
-)
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test"
+  )
 parallelExecution in Test := false
-
-      

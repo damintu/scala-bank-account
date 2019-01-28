@@ -2,6 +2,8 @@ package models
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.libs.json._
 
 //to keep it simple the total amount on the account will be stored with the operation
@@ -22,6 +24,7 @@ object Operation {
     def writes(ts: Timestamp) = JsString(format.format(ts))
   }
   implicit val operationFormat = Json.format[Operation]
+
 }
 
 

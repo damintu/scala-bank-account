@@ -22,6 +22,13 @@ Implementation : PlayFramework/Scala
     withdrawal with amount <= 0
     list of operations
     
+## Run it with docker !
+simply run 
+
+    docker-compose up -d
+    
+and connect to localhost:9100
+
 ## To run the project simply run 
 
     sbt run

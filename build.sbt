@@ -1,5 +1,5 @@
 name := "scala-bank-account"
- 
+maintainer := "dsarramalho@wemanity.com"
 version := "1.0" 
       
 lazy val `projects` = (project in file(".")).enablePlugins(PlayScala)
@@ -16,11 +16,9 @@ libraryDependencies ++= Seq(
   ws ,
   specs2 % Test ,
   guice,
+  "mysql" % "mysql-connector-java" % "8.0.15",
   "org.scalactic" %% "scalactic" % "3.0.5",
   "io.rest-assured" % "scala-support" % "3.3.0",
-  "com.h2database" % "h2" % "1.4.192",
-  "com.typesafe.slick" %% "slick" % "3.2.3",
-  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
   "com.typesafe.play" %% "play-slick" % "3.0.3",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.3",
   "org.scalactic" %% "scalactic" % "3.0.5",
